@@ -142,7 +142,15 @@ int main() {
         // Iterate over AABBs array and draw as SDL Rects
         for (int i = 0; i < (sizeof(aabbs) / sizeof(aabbs[0])); i++) {
             SDL_Rect r = SDL_RectAABB(aabbs[i]);
-            SDL_RenderDrawRect(_renderer, &r);
+            if (_selectedAABB == aabbs[i]) {
+                SDL_RenderFillRect(_renderer, &r);
+            } else {
+                SDL_RenderDrawRect(_renderer, &r);
+            }
+            /*printf("The value of s is: %p\n", (void *) _selectedAABB);
+            printf("The direction of s is: %p\n", (void *) &_selectedAABB);
+            SDL_Rect r = SDL_RectAABB(aabbs[i]);
+            SDL_RenderDrawRect(_renderer, &r);*/
         }
 
         // Draw to renderer
