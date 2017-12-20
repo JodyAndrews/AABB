@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "aabb.h"
 #include "include/common.h"
 
@@ -9,10 +10,15 @@
 // SDL Drawing
 SDL_Window *_window;
 SDL_Renderer *_renderer;
+SDL_Rect _headerRect;
+SDL_Texture *_headerText;
 
 // AABB Array
 aabb *aabbs[2];
 aabb *_selectedAABB;
+vec2 _scale = (vec2) {.x = 1.1f, .y = 1.1f};
+
+// Whether mouse button is held down within an AABB
 enum cBOOL inAABB = cFALSE;
 
 /// Transpose AABB to an SDL Rect
@@ -29,6 +35,8 @@ SDL_Rect SDL_RectAABB(aabb *raabb) {
     return r;
 }
 
+/// Handle mouse click and drag
+/// \param e
 void handleMouseDrag(SDL_Event e) {
     if (e.type == SDL_MOUSEBUTTONDOWN) {
         int i = 0;
@@ -54,12 +62,39 @@ void handleMouseDrag(SDL_Event e) {
     }
 }
 
-/// Main (entry point)
-/// \return 0 on any clean exit
-int main() {
+void init_aabbs()
+{
+    // Couple of AABBs
+    aabb *a1 = cInitAABB(
+            (vec2) {
+                    .x = 100,
+                    .y = 100
+            },
+            (vec2) {
+                    .x = 50,
+                    .y = 50
+            });
+
+    aabb *a2 = cInitAABB(
+            (vec2) {
+                    .x = 250,
+                    .y = 250
+            },
+            (vec2) {
+                    .x = 50,
+                    .y = 50
+            });
+
+    aabbs[0] = a1;
+    aabbs[1] = a2;
+
+    // Default selected to first aabb
+    _selectedAABB = a1;
+}
+
+void init_sdl()
+{
     int rc = 0;
-    SDL_Event event;
-    SDL_bool loop = SDL_TRUE;
 
     // Only need video
     rc = SDL_Init(SDL_INIT_VIDEO);
@@ -75,32 +110,30 @@ int main() {
         exit(0);
     }
 
-    // Couple of AABBs
-    aabb *a1 = cInitAABB(
-            (vec2) {
-                    .x = 0,
-                    .y = 0
-            },
-            (vec2) {
-                    .x = 50,
-                    .y = 50
-            });
+    // Instructions
+    TTF_Init();
+    TTF_Font* font = TTF_OpenFont("../resources/OpenSans-Regular.ttf", 18);
 
-    aabb *a2 = cInitAABB(
-            (vec2) {
-                    .x = 70,
-                    .y = 70
-            },
-            (vec2) {
-                    .x = 50,
-                    .y = 50
-            });
+    SDL_Color white = {255, 255, 255};
+    SDL_Surface* textSurface = TTF_RenderText_Blended( font, "Select and Drag with Mouse. Square Brackets [ ] to scale", white );
 
-    aabbs[0] = a1;
-    aabbs[1] = a2;
-    vec2 v = (vec2) {.x = 1.1f, .y = 1.1f};
+    _headerText = SDL_CreateTextureFromSurface(_renderer, textSurface);
 
-    _selectedAABB = a1;
+    _headerRect.x = WINDOW_W / 2 - textSurface->w / 2;
+    _headerRect.y = 0;
+    _headerRect.w = textSurface->w;
+    _headerRect.h = textSurface->h;
+}
+
+/// Main (entry point)
+/// \return 0 on any clean exit
+int main()
+{
+    SDL_Event event;
+    SDL_bool loop = SDL_TRUE;
+
+    init_sdl();
+    init_aabbs();
 
     while (loop) {
         // Handle SDL Events
@@ -113,10 +146,10 @@ int main() {
                         loop = SDL_FALSE;
                         break;
                     case SDLK_LEFTBRACKET:
-                        cAABBScale(_selectedAABB, cVec2Inverse(v));
+                        cAABBScale(_selectedAABB, cVec2Inverse(_scale));
                         break;
                     case SDLK_RIGHTBRACKET:
-                        cAABBScale(_selectedAABB, v);
+                        cAABBScale(_selectedAABB, _scale);
                         break;
                     default:
                         break;
@@ -147,14 +180,14 @@ int main() {
             } else {
                 SDL_RenderDrawRect(_renderer, &r);
             }
-            /*printf("The value of s is: %p\n", (void *) _selectedAABB);
-            printf("The direction of s is: %p\n", (void *) &_selectedAABB);
-            SDL_Rect r = SDL_RectAABB(aabbs[i]);
-            SDL_RenderDrawRect(_renderer, &r);*/
         }
+
+        SDL_RenderCopy(_renderer, _headerText, NULL, &_headerRect);
 
         // Draw to renderer
         SDL_RenderPresent(_renderer);
+
+        SDL_Delay(10);
     }
 
     // Destroy, quit SDL and exit
