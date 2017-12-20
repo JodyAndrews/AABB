@@ -61,17 +61,17 @@ vec2 cAABBBottomRight(aabb *self)
     return cVec2Add(self->center, self->he);
 }
 
-enum cBOOL cAABBOverlap(aabb *self, aabb *aabb)
+enum cBOOL cAABBOverlap(aabb *self, aabb *aabb, vec2 *intersection)
 {
-    vec2 cd = aabb->center;
-    cd = cVec2Sub(cd, self->center);
-    cd = cVec2Fabs(cd);
+    vec2 cd = cVec2Fabs(cVec2Sub(aabb->center, self->center));
 
     vec2 hes = self->he;
     hes = cVec2Add(hes, aabb->he);
 
-    cd = cVec2Sub(cd, hes);
-    return cd.x < 0 && cd.y < 0 ? cTRUE : cFALSE;
+    intersection->x = cd.x - hes.x;
+    intersection->y = cd.y - hes.y;
+
+    return intersection->x < 0 && intersection->y < 0 ? cTRUE : cFALSE;
 }
 
 enum cBOOL cAABBContainsPoint(aabb *self, vec2 p)

@@ -130,7 +130,10 @@ int main() {
         // Draw AABB rectangles as white
         SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 1);
 
-        if (cAABBOverlap(aabbs[0], aabbs[1])) {
+        vec2 intersection = cVec2Zero();
+
+        // Draw AABB rectangles yellow if overlapping
+        if (cAABBOverlap(aabbs[0], aabbs[1], &intersection)) {
             SDL_SetRenderDrawColor(_renderer, 255, 255, 0, 1);
         }
 
