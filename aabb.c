@@ -5,8 +5,8 @@
 
 vec2 cVec2Fabs(vec2 v)
 {
-    v.x = (float)fabs(v.x);
-    v.y = (float)fabs(v.y);
+    v.x = fabs(v.x);
+    v.y = fabs(v.y);
     return v;
 }
 
@@ -18,14 +18,14 @@ vec2 cVec2Zero()
     return zero;
 }
 
-vec2 cAddVec2(vec2 vec_a, vec2 vec_b)
+vec2 cVec2Add(vec2 vec_a, vec2 vec_b)
 {
     vec_a.x += vec_b.x;
     vec_a.y += vec_b.y;
     return vec_a;
 }
 
-vec2 cSubVec2(vec2 vec_a, vec2 vec_b)
+vec2 cVec2Sub(vec2 vec_a, vec2 vec_b)
 {
     vec_a.x -= vec_b.x;
     vec_a.y -= vec_b.y;
@@ -37,7 +37,7 @@ vec2 cAABBBottomLeft(aabb *self)
     vec2 bldv = cVec2Zero();
     bldv.x = -self->he.x;
     bldv.y = self->he.y;
-    return cAddVec2(self->center, bldv);
+    return cVec2Add(self->center, bldv);
 }
 
 vec2 cAABBTopLeft(aabb *self)
@@ -45,7 +45,7 @@ vec2 cAABBTopLeft(aabb *self)
     vec2 tldv = cVec2Zero();
     tldv.x = -self->he.x;
     tldv.y = -self->he.y;
-    return cAddVec2(self->center, tldv);
+    return cVec2Add(self->center, tldv);
 }
 
 vec2 cAABBTopRight(aabb *self)
@@ -53,32 +53,30 @@ vec2 cAABBTopRight(aabb *self)
     vec2 trdv = cVec2Zero();
     trdv.x = self->he.x;
     trdv.y = -self->he.y;
-    return cAddVec2(self->center, trdv);
+    return cVec2Add(self->center, trdv);
 }
 
 vec2 cAABBBottomRight(aabb *self)
 {
-    return cAddVec2(self->center, self->he);
+    return cVec2Add(self->center, self->he);
 }
 
 enum cBOOL cAABBOverlap(aabb *self, aabb *aabb)
 {
     vec2 cd = aabb->center;
-    cd = cSubVec2(cd, self->center);
-    // Todo: For consideration. Potential minor precision loss here, from float to double
+    cd = cVec2Sub(cd, self->center);
     cd = cVec2Fabs(cd);
 
     vec2 hes = self->he;
-    hes = cAddVec2(hes, aabb->he);
+    hes = cVec2Add(hes, aabb->he);
 
-    cd = cSubVec2(cd, hes);
+    cd = cVec2Sub(cd, hes);
     return cd.x < 0 && cd.y < 0 ? cTRUE : cFALSE;
 }
 
 enum cBOOL cAABBContainsPoint(aabb *self, vec2 p)
 {
-    // Todo: For consideration. Potential minor precision loss here, from float to double
-    vec2 d = cVec2Fabs(cSubVec2(p, self->center));
+    vec2 d = cVec2Fabs(cVec2Sub(p, self->center));
     return d.x < self->he.x && d.y < self->he.y ? cTRUE : cFALSE;
 }
 

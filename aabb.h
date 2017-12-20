@@ -3,8 +3,8 @@
 
 /// Struct : A Vec2 as vec2
 typedef struct struct_vec2 {
-    float x;
-    float y;
+    double x;
+    double y;
 } vec2;
 
 /// Struct: An AABB struct as aabb

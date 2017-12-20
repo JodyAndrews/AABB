@@ -18,6 +18,9 @@ SDL_Renderer *_renderer;
 // AABB Array
 aabb *aabbs[2];
 
+enum cBOOL _mouseDrag = cFALSE;
+aabb *_selectedAABB;
+
 /// Transpose AABB to an SDL Rect
 /// \param raabb
 /// \return SDL_Rect rect
@@ -30,6 +33,32 @@ SDL_Rect SDL_RectAABB(aabb *raabb) {
     };
 
     return r;
+}
+
+void handleMouseDrag(SDL_Event e) {
+    if (e.type == SDL_MOUSEMOTION) {
+        int x, y;
+        int pressed = SDL_GetMouseState(&x, &y) & SDL_BUTTON(1);
+
+        if (pressed && !_mouseDrag) {
+            int i = 0;
+            do {
+                if (aabbs[i]->containsPoint(aabbs[i], (vec2) {.x = x, .y = y})) {
+                    _mouseDrag = cTRUE;
+                    _selectedAABB = aabbs[i];
+                    break;
+                }
+                i++;
+            } while (i < sizeof(aabbs) / sizeof(aabbs[0]));
+        } else if (!pressed) {
+            _mouseDrag = cFALSE;
+        }
+
+        if (_mouseDrag) {
+            _selectedAABB->center.x += e.motion.xrel;
+            _selectedAABB->center.y += e.motion.yrel;
+        }
+    }
 }
 
 /// Main (entry point)
@@ -79,24 +108,20 @@ int main() {
 
     while (loop) {
         // Handle SDL Events
-        SDL_PollEvent(&event);
-        if (event.type == SDL_QUIT) {
-            loop = SDL_FALSE;
-        } else if (event.type == SDL_KEYDOWN) {
-            switch (event.key.keysym.sym) {
-                case SDLK_ESCAPE:
-                    loop = SDL_FALSE;
-                    break;
-                default:
-                    break;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                loop = SDL_FALSE;
+            } else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        loop = SDL_FALSE;
+                        break;
+                    default:
+                        break;
+                }
             }
+            handleMouseDrag(event);
         }
-
-        // Physics
-
-        enum cBOOL c = cAABBOverlap(aabbs[0], aabbs[1]);
-
-        // Draw
 
         // Blank Window as black
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
@@ -105,8 +130,12 @@ int main() {
         // Draw AABB rectangles as white
         SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 1);
 
+        if (cAABBOverlap(aabbs[0], aabbs[1])) {
+            SDL_SetRenderDrawColor(_renderer, 255, 255, 0, 1);
+        }
+
         // Iterate over AABBs array and draw as SDL Rects
-        for (int i = 0; i < (sizeof(aabbs)/ sizeof(aabbs[0])); i++) {
+        for (int i = 0; i < (sizeof(aabbs) / sizeof(aabbs[0])); i++) {
             SDL_Rect r = SDL_RectAABB(aabbs[i]);
             SDL_RenderDrawRect(_renderer, &r);
         }
