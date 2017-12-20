@@ -1,8 +1,3 @@
-/*
- * Author: Jode Andrews
- * Purpose: Example AABB
- * Language:  C
- */
 #include <SDL2/SDL.h>
 #include "aabb.h"
 #include "include/common.h"
@@ -17,9 +12,8 @@ SDL_Renderer *_renderer;
 
 // AABB Array
 aabb *aabbs[2];
-
-enum cBOOL _mouseDrag = cFALSE;
 aabb *_selectedAABB;
+enum cBOOL inAABB = cFALSE;
 
 /// Transpose AABB to an SDL Rect
 /// \param raabb
@@ -36,25 +30,24 @@ SDL_Rect SDL_RectAABB(aabb *raabb) {
 }
 
 void handleMouseDrag(SDL_Event e) {
+    if (e.type == SDL_MOUSEBUTTONDOWN) {
+        int i = 0;
+        do {
+            if (aabbs[i]->containsPoint(aabbs[i], (vec2) {.x = e.motion.x, .y = e.motion.y})) {
+                _selectedAABB = aabbs[i];
+                inAABB = cTRUE;
+                break;
+            }
+            i++;
+        } while (i < sizeof(aabbs) / sizeof(aabbs[0]));
+    }
+
+    if (e.type == SDL_MOUSEBUTTONUP) {
+        inAABB = cFALSE;
+    }
+
     if (e.type == SDL_MOUSEMOTION) {
-        int x, y;
-        int pressed = SDL_GetMouseState(&x, &y) & SDL_BUTTON(1);
-
-        if (pressed && !_mouseDrag) {
-            int i = 0;
-            do {
-                if (aabbs[i]->containsPoint(aabbs[i], (vec2) {.x = x, .y = y})) {
-                    _mouseDrag = cTRUE;
-                    _selectedAABB = aabbs[i];
-                    break;
-                }
-                i++;
-            } while (i < sizeof(aabbs) / sizeof(aabbs[0]));
-        } else if (!pressed) {
-            _mouseDrag = cFALSE;
-        }
-
-        if (_mouseDrag) {
+        if (inAABB) {
             _selectedAABB->center.x += e.motion.xrel;
             _selectedAABB->center.y += e.motion.yrel;
         }
@@ -105,6 +98,9 @@ int main() {
 
     aabbs[0] = a1;
     aabbs[1] = a2;
+    vec2 v = (vec2) {.x = 1.1f, .y = 1.1f};
+
+    _selectedAABB = a1;
 
     while (loop) {
         // Handle SDL Events
@@ -115,6 +111,12 @@ int main() {
                 switch (event.key.keysym.sym) {
                     case SDLK_ESCAPE:
                         loop = SDL_FALSE;
+                        break;
+                    case SDLK_LEFTBRACKET:
+                        cAABBScale(_selectedAABB, cVec2Inverse(v));
+                        break;
+                    case SDLK_RIGHTBRACKET:
+                        cAABBScale(_selectedAABB, v);
                         break;
                     default:
                         break;

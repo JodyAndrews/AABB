@@ -64,11 +64,18 @@ vec2 cVec2Add(vec2 vec_a, vec2 vec_b);
 /// \return Result of subtraction
 vec2 cVec2Sub(vec2 vec_a, vec2 vec_b);
 
+vec2 cVec2Inverse(vec2 vec);
+
 /// Tests an Overlap between two AABBs.
 /// \param self
 /// \param aabb
 /// \return cTRUE when an overlap occurs, otherwise cFALSE. Will return cFALSE if vector boundaries overlap.
 enum cBOOL cAABBOverlap(aabb *self, aabb *aabb, vec2 *intersection);
+
+/// Scales an AABB rather a vector2
+/// \param self
+/// \param scale
+void cAABBScale(aabb *self, vec2 scale);
 
 /// Creates an AABB from a center vector and it's halfextents
 /// \param c

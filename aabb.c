@@ -32,6 +32,13 @@ vec2 cVec2Sub(vec2 vec_a, vec2 vec_b)
     return vec_a;
 }
 
+vec2 cVec2Inverse(vec2 vec)
+{
+    vec.x = 1/vec.x;
+    vec.y = 1/vec.y;
+    return vec;
+}
+
 vec2 cAABBBottomLeft(aabb *self)
 {
     vec2 bldv = cVec2Zero();
@@ -78,6 +85,12 @@ enum cBOOL cAABBContainsPoint(aabb *self, vec2 p)
 {
     vec2 d = cVec2Fabs(cVec2Sub(p, self->center));
     return d.x < self->he.x && d.y < self->he.y ? cTRUE : cFALSE;
+}
+
+void cAABBScale(aabb *self, vec2 scale)
+{
+    self->he.x *= scale.x;
+    self->he.y *= scale.y;
 }
 
 aabb *cInitAABB(vec2 c, vec2 he)
