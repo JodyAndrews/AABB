@@ -39,7 +39,7 @@ typedef struct struct_aabb {
     /// \param aabb_1
     /// \param aabb_2
     /// \return cTRUE when an overlap occurs, otherwise cFALSE.
-    enum cBOOL (*overlaps)(struct struct_aabb *self, struct struct_aabb *aabb_2, vec2 intersection);
+    enum cBOOL (*overlaps)(struct struct_aabb *self, struct struct_aabb *aabb_2, vec2 *intersection);
 
     /// Tests for a point within the AABB
     /// \param self
