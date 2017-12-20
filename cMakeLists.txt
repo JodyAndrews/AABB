@@ -5,6 +5,8 @@ project(AABB)
 
 set(CMAKE_C_STANDARD 11)
 
+file(COPY resources DESTINATION .)
+
 set(SOURCE_FILES main.c aabb.c)
 
 add_executable(AABB ${SOURCE_FILES})

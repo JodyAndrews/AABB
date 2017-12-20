@@ -112,7 +112,7 @@ void init_sdl()
 
     // Instructions
     TTF_Init();
-    TTF_Font* font = TTF_OpenFont("../resources/OpenSans-Regular.ttf", 18);
+    TTF_Font* font = TTF_OpenFont("resources/OpenSans-Regular.ttf", 18);
 
     SDL_Color white = {255, 255, 255};
     SDL_Surface* textSurface = TTF_RenderText_Blended( font, "Select and Drag with Mouse. Square Brackets [ ] to scale", white );
