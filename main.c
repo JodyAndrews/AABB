@@ -5,6 +5,7 @@
  */
 #include <SDL2/SDL.h>
 #include "aabb.h"
+#include "include/common.h"
 
 // Define window extremities
 #define WINDOW_H 480
@@ -17,7 +18,7 @@ SDL_Renderer *_renderer;
 // AABB Array
 aabb *aabbs[2];
 
-/// Tranpose AABB to an SDL Rect
+/// Transpose AABB to an SDL Rect
 /// \param raabb
 /// \return SDL_Rect rect
 SDL_Rect SDL_RectAABB(aabb *raabb) {
@@ -31,7 +32,7 @@ SDL_Rect SDL_RectAABB(aabb *raabb) {
     return r;
 }
 
-/// Main
+/// Main (entry point)
 /// \return 0 on any clean exit
 int main() {
     int rc = 0;
@@ -41,14 +42,14 @@ int main() {
     // Only need video
     rc = SDL_Init(SDL_INIT_VIDEO);
     if (rc != 0) {
-        printf("Error Initialising SDL");
+        printf("[Error] Initialising SDL");
         exit(0);
     }
 
     // Shortcut create an SDL window and renderer
     rc = SDL_CreateWindowAndRenderer(WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN, &_window, &_renderer);
     if (rc != 0) {
-        printf("Error Creating Window and Renderer");
+        printf("[Error] Creating Window and Renderer");
         exit(0);
     }
 
@@ -65,8 +66,8 @@ int main() {
 
     aabb *a2 = cInitAABB(
             (vec2) {
-                    .x = 100,
-                    .y = 100
+                    .x = 70,
+                    .y = 70
             },
             (vec2) {
                     .x = 50,
@@ -91,12 +92,20 @@ int main() {
             }
         }
 
-        // Blank Window
+        // Physics
+
+        enum cBOOL c = cAABBOverlap(aabbs[0], aabbs[1]);
+
+        // Draw
+
+        // Blank Window as black
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
         SDL_RenderClear(_renderer);
 
-        // Draw Rectangles
+        // Draw AABB rectangles as white
         SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 1);
+
+        // Iterate over AABBs array and draw as SDL Rects
         for (int i = 0; i < (sizeof(aabbs)/ sizeof(aabbs[0])); i++) {
             SDL_Rect r = SDL_RectAABB(aabbs[i]);
             SDL_RenderDrawRect(_renderer, &r);
@@ -106,6 +115,7 @@ int main() {
         SDL_RenderPresent(_renderer);
     }
 
+    // Destroy, quit SDL and exit
     SDL_DestroyWindow(_window);
     SDL_Quit();
     exit(0);
