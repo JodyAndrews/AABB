@@ -125,6 +125,8 @@ void init_sdl()
   _headerRect.y = 0;
   _headerRect.w = textSurface->w;
   _headerRect.h = textSurface->h;
+
+  SDL_FreeSurface(textSurface);
 }
 
 /// Main (entry point)
