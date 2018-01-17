@@ -127,6 +127,7 @@ void init_sdl()
   _headerRect.h = textSurface->h;
 
   SDL_FreeSurface(textSurface);
+  textSurface = NULL;
 }
 
 /// Main (entry point)
@@ -195,6 +196,7 @@ int main()
   }
 
   // Destroy, quit SDL and exit
+  SDL_DestroyTexture(_headerText);
   SDL_DestroyWindow(_window);
   SDL_Quit();
   exit(0);
