@@ -2,6 +2,7 @@
 #include <SDL2/SDL_ttf.h>
 #include "aabb.h"
 
+
 // Define window extremities
 #define WINDOW_H 480
 #define WINDOW_W 640
@@ -9,13 +10,20 @@
 // SDL Drawing
 SDL_Window *_window;
 SDL_Renderer *_renderer;
-SDL_Rect _headerRect;
+// Where we're drawing our header to
+SDL_Rect _headerTextRect;
+// Our header texture
 SDL_Texture *_headerText;
+
+// Common Font
+TTF_Font *font;
 
 // AABB Array
 aabb *aabbs[2];
 aabb *_selectedAABB;
 vec2 _scale = (vec2) {.x = 1.1f, .y = 1.1f};
+
+SDL_Color white = {255, 255, 255};
 
 // Whether mouse button is held down within an AABB
 bool inAABB = false;
@@ -26,8 +34,8 @@ bool inAABB = false;
 SDL_Rect SDL_RectAABB(aabb *raabb)
 {
   SDL_Rect r = {
-          .x = (int) raabb->topLeft(raabb).x,
-          .y = (int) raabb->topLeft(raabb).y,
+          .x = (int) mAABBTopLeft(raabb).x,
+          .y = (int) mAABBTopLeft(raabb).y,
           .w = (int) raabb->he.x * 2,
           .h = (int) raabb->he.y * 2
   };
@@ -42,7 +50,7 @@ void handleMouseDrag(SDL_Event e)
   if (e.type == SDL_MOUSEBUTTONDOWN) {
     int i = 0;
     do {
-      if (aabbs[i]->containsPoint(aabbs[i], (vec2) {.x = e.motion.x, .y = e.motion.y})) {
+      if (mAABBContainsPoint(aabbs[i], (vec2) {.x = e.motion.x, .y = e.motion.y})) {
         _selectedAABB = aabbs[i];
         inAABB = true;
         break;
@@ -66,7 +74,7 @@ void handleMouseDrag(SDL_Event e)
 void init_aabbs()
 {
   // Couple of AABBs
-  aabb *a1 = cInitAABB(
+  aabb *a1 = mInitAABB(
           (vec2) {
                   .x = 100,
                   .y = 100
@@ -76,7 +84,7 @@ void init_aabbs()
                   .y = 50
           });
 
-  aabb *a2 = cInitAABB(
+  aabb *a2 = mInitAABB(
           (vec2) {
                   .x = 250,
                   .y = 250
@@ -113,18 +121,18 @@ void init_sdl()
 
   // Instructions
   TTF_Init();
-  TTF_Font *font = TTF_OpenFont("resources/OpenSans-Regular.ttf", 18);
+  font = TTF_OpenFont("resources/OpenSans-Regular.ttf", 18);
 
-  SDL_Color white = {255, 255, 255};
-  SDL_Surface *textSurface = TTF_RenderText_Blended(font, "Select and Drag with Mouse. Square Brackets [ ] to scale",
+
+  SDL_Surface *textSurface = TTF_RenderText_Blended(font, "Select and Drag with Mouse. Scale [ ]. Stretch WASD",
                                                     white);
 
   _headerText = SDL_CreateTextureFromSurface(_renderer, textSurface);
 
-  _headerRect.x = WINDOW_W / 2 - textSurface->w / 2;
-  _headerRect.y = 0;
-  _headerRect.w = textSurface->w;
-  _headerRect.h = textSurface->h;
+  _headerTextRect.x = WINDOW_W / 2 - textSurface->w / 2;
+  _headerTextRect.y = 0;
+  _headerTextRect.w = textSurface->w;
+  _headerTextRect.h = textSurface->h;
 
   SDL_FreeSurface(textSurface);
   textSurface = NULL;
@@ -151,10 +159,22 @@ int main()
             loop = SDL_FALSE;
             break;
           case SDLK_LEFTBRACKET:
-            cAABBScale(_selectedAABB, cVec2Inverse(_scale));
+            mAABBScale(_selectedAABB, mVec2Inv(_scale));
             break;
           case SDLK_RIGHTBRACKET:
-            cAABBScale(_selectedAABB, _scale);
+            mAABBScale(_selectedAABB, _scale);
+            break;
+          case SDLK_w:
+            mAABBStretch(_selectedAABB, (vec2) {.x = 0, .y = -2});
+            break;
+          case SDLK_d:
+            mAABBStretch(_selectedAABB, (vec2) {.x = 2, .y = 0});
+            break;
+          case SDLK_s:
+            mAABBStretch(_selectedAABB, (vec2) {.x = 0, .y = 2});
+            break;
+          case SDLK_a:
+            mAABBStretch(_selectedAABB, (vec2) {.x = -2, .y = 0});
             break;
           default:
             break;
@@ -170,10 +190,10 @@ int main()
     // Draw AABB rectangles as white
     SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 1);
 
-    vec2 intersection = cVec2Zero();
+    vec2 intersection = VEC2ZERO;
 
     // Draw AABB rectangles yellow if overlapping
-    if (cAABBOverlap(aabbs[0], aabbs[1], &intersection)) {
+    if (mAABBOverlap(aabbs[0], aabbs[1], &intersection)) {
       SDL_SetRenderDrawColor(_renderer, 255, 255, 0, 1);
     }
 
@@ -187,7 +207,13 @@ int main()
       }
     }
 
-    SDL_RenderCopy(_renderer, _headerText, NULL, &_headerRect);
+    // Iterate over AABBs array and draw center points
+    for (int i = 0; i < (sizeof(aabbs) / sizeof(aabbs[0])); i++) {
+      SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 1);
+      SDL_RenderDrawPoint(_renderer, (int)aabbs[i]->center.x, (int)aabbs[i]->center.y);
+    }
+
+    SDL_RenderCopy(_renderer, _headerText, NULL, &_headerTextRect);
 
     // Draw to renderer
     SDL_RenderPresent(_renderer);
