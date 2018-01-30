@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 
-#define VEC2ZERO { .x = 0, .y = 0 }
-#define VEC2ONE { .x = 1, .y = 1 }
+#define VEC2ZERO (vec2) { .x = 0, .y = 0 }
+#define VEC2ONE (vec2) { .x = 1, .y = 1 }
 
 typedef struct {
   double x;
