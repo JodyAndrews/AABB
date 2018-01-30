@@ -5,6 +5,8 @@
 #include <stdbool.h>
 
 #define pi 3.14159265358979323846
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 /// Convert degrees to radians
 /// \param degrees
