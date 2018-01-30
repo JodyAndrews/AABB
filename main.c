@@ -21,6 +21,8 @@ TTF_Font *font;
 // AABB Array
 aabb *aabbs[2];
 aabb *_selectedAABB;
+aabb *_intersectingAABB;
+
 vec2 _scale = (vec2) {.x = 1.1f, .y = 1.1f};
 
 SDL_Color white = {255, 255, 255};
@@ -86,8 +88,8 @@ void init_aabbs()
 
   aabb *a2 = mInitAABB(
           (vec2) {
-                  .x = 250,
-                  .y = 250
+                  .x = 200,
+                  .y = 200
           },
           (vec2) {
                   .x = 50,
@@ -96,6 +98,18 @@ void init_aabbs()
 
   aabbs[0] = a1;
   aabbs[1] = a2;
+
+  // AABB to store the intersection depth
+  _intersectingAABB = mInitAABB(
+          (vec2) {
+                  .x = 0,
+                  .y = 0
+          },
+          (vec2) {
+                  .x = 0,
+                  .y = 0
+          }
+  );
 
   // Default selected to first aabb
   _selectedAABB = a1;
@@ -145,6 +159,7 @@ int main()
   SDL_Event event;
   SDL_bool loop = SDL_TRUE;
 
+  bool intersecting = false;
   init_sdl();
   init_aabbs();
 
@@ -190,11 +205,15 @@ int main()
     // Draw AABB rectangles as white
     SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 1);
 
+    // Signed depth of intersection point
     vec2 intersection = VEC2ZERO;
+    intersecting = mAABBOverlap(aabbs[0], aabbs[1], &intersection);
 
-    // Draw AABB rectangles yellow if overlapping
-    if (mAABBOverlap(aabbs[0], aabbs[1], &intersection)) {
+    // Draw AABB rectangles yellow if overlapping and get an AABB for the intersection depth
+    if (intersecting) {
       SDL_SetRenderDrawColor(_renderer, 255, 255, 0, 1);
+
+      mAABBIntersection(aabbs[0], aabbs[1], _intersectingAABB);
     }
 
     // Iterate over AABBs array and draw as SDL Rects
@@ -210,7 +229,16 @@ int main()
     // Iterate over AABBs array and draw center points
     for (int i = 0; i < (sizeof(aabbs) / sizeof(aabbs[0])); i++) {
       SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 1);
-      SDL_RenderDrawPoint(_renderer, (int)aabbs[i]->center.x, (int)aabbs[i]->center.y);
+      SDL_RenderDrawPoint(_renderer, (int) aabbs[i]->center.x, (int) aabbs[i]->center.y);
+    }
+
+    // If intersecting then draw the AABB to show the intersection depth
+    if (intersecting) {
+      SDL_SetRenderDrawColor(_renderer, 0, 255, 255, 1);
+      SDL_Rect r = SDL_RectAABB(_intersectingAABB);
+      SDL_RenderFillRect(_renderer, &r);
+      SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 1);
+      SDL_RenderDrawPoint(_renderer, (int)_intersectingAABB->center.x, (int)_intersectingAABB->center.y);
     }
 
     SDL_RenderCopy(_renderer, _headerText, NULL, &_headerTextRect);

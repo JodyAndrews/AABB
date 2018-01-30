@@ -1,4 +1,6 @@
+#include <math.h>
 #include "vec2.h"
+#include "helpers.h"
 
 ///
 /// \param a

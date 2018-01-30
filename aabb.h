@@ -11,7 +11,6 @@ typedef struct  {
 
   /// Half-Extents of AABB
   vec2 he;
-
 } aabb;
 
 /// Clamps a vector2 to an AABB
@@ -40,6 +39,32 @@ vec2 mAABBTopRight(aabb *a);
 /// \return Vector2 of the Bottom Right of the AABB
 vec2 mAABBBottomRight(aabb *a);
 
+/// Left-most (x) point on AABB
+/// \param a
+/// \return
+double mAABBLeft(aabb *a);
+
+/// Top-most (y) point on AABB
+/// \param a
+/// \return
+double mAABBTop(aabb *a);
+
+/// Right-most (x) point on AABB
+/// \param a
+/// \return
+double mAABBRight(aabb *a);
+
+/// Bottom-most (y) point on AABB
+/// \param a
+/// \return
+double mAABBBottom(aabb *a);
+
+/// Retrieves the intersection depth as an AABB of two AABBs
+/// \param a
+/// \param b
+/// \param intersection result
+void mAABBIntersection(aabb *a, aabb *b, aabb *intersection);
+
 /// Tests for an Overlap between two AABBs.
 /// \param a
 /// \param b
@@ -61,6 +86,12 @@ void mAABBScale(aabb *self, vec2 scale);
 /// \param a
 /// \param stretch
 void mAABBStretch(aabb *a, vec2 stretch);
+
+/// Unions two AABBs into one bounding AABB
+/// \param a
+/// \param b
+/// \param res
+void mAABBUnion(aabb *a, aabb *b, aabb *res);
 
 /// Creates an AABB from a center vector and it's halfextents
 /// \param c
