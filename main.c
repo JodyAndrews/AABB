@@ -38,8 +38,8 @@ SDL_Rect SDL_RectAABB(aabb *raabb)
   SDL_Rect r = {
           .x = (int) mAABBTopLeft(raabb).x,
           .y = (int) mAABBTopLeft(raabb).y,
-          .w = (int) raabb->he.x * 2,
-          .h = (int) raabb->he.y * 2
+          .w = (int) ceil(raabb->he.x * 2),
+          .h = (int) ceil(raabb->he.y * 2)
   };
 
   return r;
